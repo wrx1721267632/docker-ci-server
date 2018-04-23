@@ -6,7 +6,7 @@
 
 package rollback
 
-import "github.com/wrxcode/deploy-server/deploy"
+import "github.com/wrxcode/deploy-server/worker/deploy"
 
 func RollBack() {
 	//

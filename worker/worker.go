@@ -15,9 +15,9 @@ import (
 	//"github.com/wrxcode/deploy-server/common/components"
 	//"github.com/wrxcode/deploy-server/common/g"
 	//"github.com/wrxcode/deploy-server/models"
-	"github.com/wrxcode/deploy-server/construct"
-	"github.com/wrxcode/deploy-server/deploy"
-	"github.com/wrxcode/deploy-server/rollback"
+	"github.com/wrxcode/deploy-server/worker/construct"
+	"github.com/wrxcode/deploy-server/worker/deploy"
+	"github.com/wrxcode/deploy-server/worker/rollback"
 
 	log "github.com/sirupsen/logrus"
 	//"fmt"
