@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/shiyicode/gin-framework/common"
-	"github.com/shiyicode/gin-framework/router"
+	"github.com/wrxcode/deploy-server/common"
+	"github.com/wrxcode/deploy-server/router"
 	"github.com/TV4/graceful"
 	"net/http"
-	"github.com/shiyicode/gin-framework/common/g"
+	"github.com/wrxcode/deploy-server/common/g"
+	"github.com/wrxcode/deploy-server/dispatch"
 	"fmt"
 )
 
@@ -18,6 +19,8 @@ func main() {
 	defer common.Close()
 
 	router := router.GetRouter()
+
+	go dispatch.StartConsume()
 
 	graceful.LogListenAndServe(&http.Server{
 		Addr:    fmt.Sprintf(":%d", g.Conf().Run.HTTPPort),

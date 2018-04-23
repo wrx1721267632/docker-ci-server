@@ -3,7 +3,7 @@ package apiv1
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/shiyicode/gin-framework/router/controllers/baseController"
+	"github.com/wrxcode/deploy-server/router/controllers/baseController"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"

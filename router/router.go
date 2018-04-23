@@ -4,10 +4,10 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shiyicode/gin-framework/common/g"
-	"github.com/shiyicode/gin-framework/router/controllers/apiv1"
-	"github.com/shiyicode/gin-framework/router/controllers/authv1"
-	"github.com/shiyicode/gin-framework/router/middleware"
+	"github.com/wrxcode/deploy-server/common/g"
+	"github.com/wrxcode/deploy-server/router/controllers/apiv1"
+	"github.com/wrxcode/deploy-server/router/controllers/authv1"
+	"github.com/wrxcode/deploy-server/router/middleware"
 )
 
 var router *gin.Engine

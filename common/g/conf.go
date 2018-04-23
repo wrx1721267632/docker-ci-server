@@ -14,13 +14,14 @@ type Config struct {
 	Log   LogConfig   `toml:"log"`
 	Mysql MysqlConfig `toml:"mysql"`
 	Jwt   JwtConfig   `toml:"jwt"`
+	Nsq   NsqConfig   `toml:"nsq"`
 }
 
 type RunConfig struct {
 	WaitTimeout int    `toml:"waitTimeout"`
 	HTTPPort    int    `toml:"httpPort"`
 	Mode        string `toml:"mode"`
-	MaxAllowed  int    `toml:maxAllowed"`
+	MaxAllowed  int    `toml:"maxAllowed"`
 }
 
 type LogConfig struct {
@@ -41,6 +42,13 @@ type MysqlConfig struct {
 type JwtConfig struct {
 	EncodeMethod     string `toml:"encodeMethod"`
 	MaxEffectiveTime int64  `toml:"maxEffectiveTime"`
+}
+
+type NsqConfig struct {
+	Lookupds     []string `toml:"lookupds"`
+	JudgeTopic   string   `toml:"judgeTopic"`
+	JudgeChannel string   `toml:"judgeChannel"`
+	HandlerCount int      `toml:"handlerCount"`
 }
 
 var (

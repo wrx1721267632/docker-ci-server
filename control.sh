@@ -2,7 +2,7 @@
 workspace=$(cd $(dirname $0) && pwd -P)
 cd $workspace
 
-app="gin-framework"
+app="deploy-server"
 cfg=cfg/cfg.toml.release
 pidfile=var/app.pid
 logfile=logs/app.log

@@ -1,17 +1,13 @@
 package models
 
 import (
-	. "github.com/shiyicode/gin-framework/common/store"
+	. "github.com/wrxcode/deploy-server/common/store"
 )
 
 type Account struct {
-	Id        int64
-	Email     string //邮箱
-	Password  string //密码
-	Phone     string //手机号
-	QqId      string //用于QQ第三方登录
-	GithubId  string //Github第三方登录
-	WeichatId string //weichat第三方登录
+	Id       int64
+	Name     string
+	Password string
 }
 
 //增加
@@ -50,9 +46,9 @@ func (this Account) GetById(id int64) (*Account, error) {
 	return account, nil
 }
 
-func (this Account) GetByEmail(email string) (*Account, error) {
+func (this Account) GetByName(name string) (*Account, error) {
 	account := new(Account)
-	has, err := OrmWeb.Where("email=?", email).Get(account)
+	has, err := OrmWeb.Where("name=?", name).Get(account)
 	if err != nil {
 		return nil, err
 	}

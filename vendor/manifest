@@ -116,6 +116,285 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/hjhcode/deploy-web/common",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "common",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/models",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "/models",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/BurntSushi/toml",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/BurntSushi/toml",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/PuerkitoBio/goquery",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/PuerkitoBio/goquery",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/andybalholm/cascadia",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/andybalholm/cascadia",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/dgrijalva/jwt-go",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/dgrijalva/jwt-go",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/go-sql-driver/mysql",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/go-sql-driver/mysql",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/go-xorm/builder",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/go-xorm/builder",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/go-xorm/core",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/go-xorm/core",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/go-xorm/xorm",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/go-xorm/xorm",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/lestrrat-go/file-rotatelogs",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/lestrrat-go/file-rotatelogs",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/lestrrat-go/strftime",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/lestrrat-go/strftime",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/mattn/go-sqlite3",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/mattn/go-sqlite3",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/pkg/errors",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/pkg/errors",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/rifflock/lfshook",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/rifflock/lfshook",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/github.com/sirupsen/logrus",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/github.com/sirupsen/logrus",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/crypto/ssh/terminal",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/crypto/ssh/terminal",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/net/html",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/net/html",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/sys/unix",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/sys/unix",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/sys/windows",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/sys/windows",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/encoding",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/encoding",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/internal/format",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/internal/format",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/internal/gen",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/internal/gen",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/internal/language",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/internal/language",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/internal/tag",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/internal/tag",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/internal/utf8internal",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/internal/utf8internal",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/language",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/language",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/runes",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/runes",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/transform",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/transform",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/golang.org/x/text/unicode/cldr",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/golang.org/x/text/unicode/cldr",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/hjhcode/deploy-web/vendor/google.golang.org/appengine/cloudsql",
+			"repository": "https://github.com/hjhcode/deploy-web",
+			"vcs": "git",
+			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"branch": "master",
+			"path": "vendor/google.golang.org/appengine/cloudsql",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/json-iterator/go",
 			"repository": "https://github.com/json-iterator/go",
 			"vcs": "git",

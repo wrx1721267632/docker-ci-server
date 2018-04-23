@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shiyicode/gin-framework/common/g"
+	"github.com/wrxcode/deploy-server/common/g"
 )
 
 func RegisterSelf(router *gin.RouterGroup) {

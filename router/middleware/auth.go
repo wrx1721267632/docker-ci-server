@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shiyicode/gin-framework/common/components"
+	"github.com/wrxcode/deploy-server/common/components"
 )
 
 func Auth() gin.HandlerFunc {

@@ -7,31 +7,34 @@ import (
 func TestAccountAdd(t *testing.T) {
 	InitAllInTest()
 
-	account := &Account{Email: "fffff@qq.com", Password: "123", Phone: "1234", QqId: "1"}
+	account := &Account{Name: "fffff@qq.com", Password: "123"}
 	if _, err := account.Add(account); err != nil {
 		t.Error("Add() failed.Error:", err)
 	}
 }
+
 func TestAccountUpdate(t *testing.T) {
 	InitAllInTest()
 
-	account := &Account{1, "qaqq@qq.com", "88", "10086", "2222", "33", "asd"}
+	account := &Account{1, "qaqq@qq.com", "88"}
 	if err := account.Update(account); err != nil {
 		t.Error("Update() failed.Error:", err)
 	}
 }
+
 func TestAccountRemove(t *testing.T) {
 	InitAllInTest()
 
 	var account Account
-	if err := account.Remove(1); err != nil {
+	if err := account.Remove(4); err != nil {
 		t.Error("Remove() failed.Error:", err)
 	}
 }
+
 func TestAccountGetById(t *testing.T) {
 	InitAllInTest()
 
-	account := &Account{Email: "bbb@qq.com", Password: "123", Phone: "1234", QqId: "1"}
+	account := &Account{Name: "bbb@qq.com", Password: "123"}
 	account.Add(account)
 
 	getAccount, err := account.GetById(account.Id)
@@ -44,18 +47,18 @@ func TestAccountGetById(t *testing.T) {
 	}
 }
 
-func TestAccountGetByEmail(t *testing.T) {
+func TestAccountGetByName(t *testing.T) {
 	InitAllInTest()
 
-	account := &Account{Email: "bbb@qq.com", Password: "123", Phone: "1234", QqId: "1"}
+	account := &Account{Name: "bbbs@qq.com", Password: "123"}
 	account.Add(account)
 
-	getAccount, err := account.GetByEmail(account.Email)
+	getAccount, err := account.GetByName(account.Name)
 	if err != nil {
 		t.Error("GetById() failed:", err.Error())
 	}
 
 	if *getAccount != *account {
-		t.Error("GetById() failed:", "%v != %v", account, getAccount)
+		t.Error("GetById() failed:", account, "!=", getAccount)
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/shiyicode/gin-framework/common/components"
-	"github.com/shiyicode/gin-framework/models"
+	"github.com/wrxcode/deploy-server/common/components"
+	"github.com/wrxcode/deploy-server/models"
 )
 
 func AccountLogin(email, password string) (bool, string, string) {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/shiyicode/gin-framework/common/g"
+	"github.com/wrxcode/deploy-server/common/g"
 )
 
 var mySigningKey = "let's to change the world!"
