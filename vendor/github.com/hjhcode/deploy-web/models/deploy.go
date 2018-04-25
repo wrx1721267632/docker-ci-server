@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	. "github.com/hjhcode/deploy-web/common/store"
 )
 
@@ -10,8 +8,8 @@ type Deploy struct {
 	Id           int64
 	ServiceId    int64
 	AccountId    int64
-	DeployStart  time.Time
-	DeployEnd    time.Time
+	DeployStart  int64
+	DeployEnd    int64
 	HostList     string
 	MirrorList   string
 	DockerConfig string
@@ -32,6 +30,12 @@ func (this Deploy) Add(deploy *Deploy) (int64, error) {
 func (this Deploy) Remove(id int64) error {
 	deploy := new(Deploy)
 	_, err := OrmWeb.Id(id).Delete(deploy)
+	return err
+}
+
+//修改
+func (this Deploy) Update(deploy *Deploy) error {
+	_, err := OrmWeb.Id(deploy.Id).Update(deploy)
 	return err
 }
 

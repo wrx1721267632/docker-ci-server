@@ -128,7 +128,7 @@
 			"importpath": "github.com/hjhcode/deploy-web/models",
 			"repository": "https://github.com/hjhcode/deploy-web",
 			"vcs": "git",
-			"revision": "67ab177378a13d0083dde5b024add47e049f5252",
+			"revision": "fdc3154e08ef717f32b6c3345aadb7663db8e146",
 			"branch": "master",
 			"path": "/models",
 			"notests": true

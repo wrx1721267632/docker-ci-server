@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	. "github.com/hjhcode/deploy-web/common/store"
 )
 
@@ -11,8 +9,8 @@ type ConstructRecord struct {
 	AccountId      int64
 	ProjectId      int64
 	MirrorId       int64
-	ConstructStart time.Time
-	ConstructEnd   time.Time
+	ConstructStart int64
+	ConstructEnd   int64
 	ConstructStatu int
 	ConstructLog   string
 }
@@ -28,9 +26,14 @@ func (this ConstructRecord) Add(constructRecord *ConstructRecord) (int64, error)
 
 //删除
 func (this ConstructRecord) Remove(id int64) error {
-
 	constructRecord := new(ConstructRecord)
 	_, err := OrmWeb.Id(id).Delete(constructRecord)
+	return err
+}
+
+//修改
+func (this ConstructRecord) Update(constructRecord *ConstructRecord) error {
+	_, err := OrmWeb.Id(constructRecord.Id).Update(constructRecord)
 	return err
 }
 

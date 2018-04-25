@@ -29,11 +29,13 @@ func GetCommit(gitPath string) (string, error){
 	gitUrl += "commits/master"
 
 	//http GET请求获取对应url中的response对象
+	//response, err := http.Post(gitUrl, "application/x-www-form-urlencoded", strings.NewReader("name=xxx"))
 	response, err := http.Get(gitUrl)
 	//如果访问不成功或者url不存在则会进入改判断
 	if err != nil {
 		return "GET Error", err
 	}
+
 	//请求完了关闭回复主体
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)

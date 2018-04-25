@@ -8,7 +8,7 @@ import (
 
 func TestGetCommit(t *testing.T) {
 	var gitpath string
-	flag.StringVar(&gitpath, "p", "http://github.com/shiyicode/judge", "Git repository")
+	flag.StringVar(&gitpath, "p", "github.com/wrxcode/deploy-server", "Git repository")
 	ret, err := GetCommit(gitpath)
 	fmt.Printf("commit: [%s]\nerror: [%v]", ret, err)
 }
