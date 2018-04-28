@@ -27,3 +27,7 @@ lookupds = ["127.0.0.1:8000"]
 judgeTopic = "realOrder"
 judgeChannel = "1.0.1"
 handlerCount = 5
+
+[docker_hub]
+status = 1      # docker_hub共有仓库是否使用
+repo = "1721267632wrx"  #docker_hub共有仓库地址
