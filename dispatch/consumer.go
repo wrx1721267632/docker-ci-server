@@ -29,7 +29,7 @@ func StartConsume() {
 	cfg := g.Conf()
 
 	consumer := new(Consumer)
-	go consumer.newConsumer(cfg.Nsq.JudgeTopic, cfg.Nsq.JudgeChannel)
+	go consumer.newConsumer(cfg.Nsq.DeployTopic, cfg.Nsq.DeployChannel)
 	consumers = append(consumers, consumer)
 
 	handlerCount = make(chan int, cfg.Nsq.HandlerCount)

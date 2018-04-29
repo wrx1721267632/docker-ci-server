@@ -16,7 +16,7 @@ maxIdle = 5      # 最大空闲连接数
 maxOpen = 10     # 最大打开连接数
 debug = false
 
-webAddr = "root:123456@tcp(localhost:3306)/fightcoder?charset=utf8&loc=Asia%2FShanghai&parseTime=true&wait_timeout=3600"
+webAddr = "root:1721267632@tcp(localhost:3306)/deploy_web?charset=utf8&loc=Asia%2FShanghai&parseTime=true&wait_timeout=3600"
 
 [jwt]
 encodeMethod = "HS256" # [HS256, HS384, HS512]
@@ -24,10 +24,13 @@ maxEffectiveTime = 3  # 最大存活时间:天
 
 [nsq]
 lookupds = ["127.0.0.1:8000"]
-judgeTopic = "realOrder"
-judgeChannel = "1.0.1"
+deployTopic = "deploy"
+deployChannel = "1.0.1"
 handlerCount = 5
 
-[docker_hub]
-status = 1      # docker_hub共有仓库是否使用
-repo = "1721267632wrx"  #docker_hub共有仓库地址
+[repo]          #若isHost和isIp都为1，则使用Host
+isHost  =   1   #是否使用host进行私有仓库绑定
+host    =   "xupt3.fightcoder.com"  #私有仓库host
+isIp    =   0   #是否使用ip进行私有仓库绑定
+ip      =   "222.24.63.117"  #私有仓库IP
+port    =   "9005"  #私有仓库port

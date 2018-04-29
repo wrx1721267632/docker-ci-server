@@ -15,6 +15,7 @@ type Config struct {
 	Mysql MysqlConfig `toml:"mysql"`
 	Jwt   JwtConfig   `toml:"jwt"`
 	Nsq   NsqConfig   `toml:"nsq"`
+	Repo  RepoConfig   `toml:"repo"`
 }
 
 type RunConfig struct {
@@ -46,9 +47,17 @@ type JwtConfig struct {
 
 type NsqConfig struct {
 	Lookupds     []string `toml:"lookupds"`
-	JudgeTopic   string   `toml:"judgeTopic"`
-	JudgeChannel string   `toml:"judgeChannel"`
+	DeployTopic   string   `toml:"deployTopic"`
+	DeployChannel string   `toml:"deployChannel"`
 	HandlerCount int      `toml:"handlerCount"`
+}
+
+type RepoConfig struct {
+	IsHost		int 	`toml:"isHost"`
+	Host 		string 	`toml:"host"`
+	IsIp		int 	`toml:"isIp"`
+	Ip 			string 	`toml:"ip"`
+	Port 		string 	`toml:"port"`
 }
 
 var (
