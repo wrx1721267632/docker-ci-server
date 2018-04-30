@@ -29,6 +29,7 @@ const (
 
 const (
 	GIT_LOGERROR = "Git repository address error, please check the input address!"
+	GIT_COMMITERROR = "Git content not have any different"
 )
 
 //构建镜像的入口函数
@@ -36,23 +37,46 @@ func ContructImage(dataId int64) {
 	// 通过Nsq发送过来的构建记录表ID，来获取构建记录信息
 	record, recordErr := models.ConstructRecord{}.GetById(dataId)
 	if recordErr != nil {
-		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, dataId, recordErr.Error())
+		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, dataId, recordErr.Error())
 		return
 	}
 	if record == nil{
-		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
+		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
 		return
 	}
 
 	// 通过构建记录表的工程ID，来获取工程信息
 	project, projectErr := models.Project{}.GetById(record.ProjectId)
 	if projectErr != nil {
-		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, dataId, projectErr.Error())
+		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, record.ProjectId, projectErr.Error())
 		return
 	}
 	if project == nil{
-		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
+		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
 		return
+	}
+
+	// 通过工程ID,来获取对应工程最后一次次构建成功的构建记录ID
+	lastSuccConstruct, lastConstructErr := models.ConstructRecord{}.GetByProjectIdAndStatu(record.ProjectId)
+	if lastConstructErr != nil {
+		log.Errorf("read sql the project last success construct record error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, dataId, projectErr.Error())
+		return
+	}
+
+	// 获取上一次构建成功的镜像信息
+	lastSuccMirrorTag := ""
+	if lastSuccConstruct != nil {
+		mirrorData, mirrorErr := models.Mirror{}.GetById(lastSuccConstruct.MirrorId)
+		if mirrorErr != nil {
+			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, lastSuccConstruct.MirrorId, projectErr.Error())
+			return
+		}
+		if mirrorData == nil{
+			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
+			return
+		}
+
+		lastSuccMirrorTag = mirrorData.MirrorVersion
 	}
 
 	// 获取提交的git版本
@@ -63,6 +87,13 @@ func ContructImage(dataId int64) {
 		return
 	}
 
+	//判断git是否有所修改，若无修改则返回构建失败并退出
+	if lastSuccMirrorTag != "" && lastSuccMirrorTag == commitKey {
+		log.Errorf("the same Git repository commit: [%s]", commitKey)
+		writeDatabaseBack(record, CONTRUCE_FAIL, 0, GIT_COMMITERROR)
+		//return
+	}
+
 	//通过docker file + docker API 进行部署
 	err := docker.DockerBuild(project.GitDockerPath, project.ProjectName, commitKey, dataId)
 	if err != nil {
@@ -71,6 +102,7 @@ func ContructImage(dataId int64) {
 		return
 	}
 
+	//push到私有仓库
 	str, err := docker.DockerPush(project.ProjectName, commitKey)
 	if err != nil {
 		log.Fatalf("docker push err: ret[%s], reason[%v]", str, err)
@@ -106,18 +138,18 @@ func ContructImage(dataId int64) {
 
 // 回写数据库
 func writeDatabaseBack(construct *models.ConstructRecord, status int, mirrorId int64, constructLog string) {
+	construct, recordErr := models.ConstructRecord{}.GetById(construct.Id)
+	if recordErr != nil {
+		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, construct.Id, recordErr.Error())
+		return
+	}
+	if construct == nil{
+		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, construct.Id)
+		return
+	}
 	if status == CONTRUCT_SUCC {
 		construct.MirrorId = mirrorId
 	} else {
-		construct, recordErr := models.ConstructRecord{}.GetById(construct.Id)
-		if recordErr != nil {
-			log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, construct.Id, recordErr.Error())
-			return
-		}
-		if construct == nil{
-			log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, construct.Id)
-			return
-		}
 		construct.ConstructLog += constructLog
 	}
 

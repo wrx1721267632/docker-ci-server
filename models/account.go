@@ -6,8 +6,8 @@ import (
 
 type Account struct {
 	Id       int64
-	Name     string
-	Password string
+	Name     string `json:"name" form:"name"`
+	Password string `json:"password" form:"password"`
 }
 
 //增加

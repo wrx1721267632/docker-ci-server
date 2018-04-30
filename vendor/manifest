@@ -1934,6 +1934,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/golang/snappy",
+			"repository": "https://github.com/golang/snappy",
+			"vcs": "git",
+			"revision": "553a641470496b2327abcac10b36396bd98e45c9",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/hjhcode/deploy-web/common",
 			"repository": "https://github.com/hjhcode/deploy-web",
 			"vcs": "git",

@@ -5,16 +5,16 @@ import (
 )
 
 type Deploy struct {
-	Id           int64
-	ServiceId    int64
-	AccountId    int64
-	DeployStart  int64
-	DeployEnd    int64
-	HostList     string
-	MirrorList   string
-	DockerConfig string
-	DeployStatu  int
-	DeployLog    string
+	Id           int64  `json:"id" form:"id"`
+	ServiceId    int64  `json:"service_id" form:"service_id"`
+	AccountId    int64  `json:"account_id" form:"account_id"`
+	DeployStart  int64  `json:"deploy_start" form:"deploy_start"`
+	DeployEnd    int64  `json:"deploy_end" form:"deploy_end"`
+	HostList     string `json:"host_list" form:"host_list"`
+	MirrorList   string `json:"mirror_list" form:"mirror_list"`
+	DockerConfig string `json:"docker_config" form:"docker_config"`
+	DeployStatu  int    `json:"deploy_statu" form:"deploy_statu"`
+	DeployLog    string `json:"deploy_log" form:"deploy_log"`
 }
 
 //增加
@@ -75,9 +75,53 @@ func (this Deploy) QueryByAccountId(accountId int64) ([]*Deploy, error) {
 //查询(所有部署）
 func (this Deploy) QueryAllDeploy() ([]*Deploy, error) {
 	deployList := make([]*Deploy, 0)
-	err := OrmWeb.Find(&deployList)
+	err := OrmWeb.Desc("id").Find(&deployList)
 	if err != nil {
 		return nil, err
 	}
 	return deployList, err
+}
+
+//查询(分页查询所有记录）
+func (this Deploy) QueryAllDeployByPage(size int, start int) ([]*Deploy, error) {
+	deployList := make([]*Deploy, 0)
+	err := OrmWeb.Limit(size, start).Find(&deployList)
+	if err != nil {
+		return nil, err
+	}
+
+	return deployList, nil
+}
+
+func (this Deploy) CountAllDeployByPage() (int64, error) {
+	sum, err := OrmWeb.Count(&Deploy{})
+	if err != nil {
+		return 0, nil
+	}
+
+	return sum, nil
+}
+
+func (this Deploy) GetByServiceId(serviceId int64) (*Deploy, error) {
+	deploy := &Deploy{ServiceId: serviceId}
+	has, err := OrmWeb.Desc("id").Get(deploy)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, nil
+	}
+	return deploy, nil
+}
+
+func (this Deploy) GetDeployBackData(serviceId int64) (*Deploy, error) {
+	deploy := &Deploy{ServiceId: serviceId, DeployStatu: 3}
+	has, err := OrmWeb.Desc("id").Get(deploy)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, nil
+	}
+	return deploy, nil
 }

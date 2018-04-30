@@ -69,5 +69,8 @@ func GetCommit(gitPath string) (string, string, error){
 		return "Commit not find", "", fmt.Errorf("regexp get nil: regexp[%s]", descReg)
 	}
 
+	retDesc = strings.Replace(retDesc,"a title=\"", "", 1)
+	retDesc = strings.Replace(retDesc, "\"", "", 1)
+
 	return retCommit, retDesc, nil
 }

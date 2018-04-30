@@ -5,10 +5,10 @@ import (
 )
 
 type Mirror struct {
-	Id             int64
-	MirrorName     string
-	MirrorVersion  string
-	MirrorDescribe string
+	Id             int64  `json:"id" form:"id"`
+	MirrorName     string `json:"mirror_name" form:"mirror_name"`
+	MirrorVersion  string `json:"mirror_version" form:"mirror_version"`
+	MirrorDescribe string `json:"mirror_describe" form:"mirror_describe"`
 }
 
 //增加

@@ -11,5 +11,5 @@ func TestDockerPull(t *testing.T) {
 	flag.Parse()
 	common.Init(*cfgFile)
 
-	ContructImage(2)
+	ContructImage(20)
 }

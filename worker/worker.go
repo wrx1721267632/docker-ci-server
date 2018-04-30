@@ -20,7 +20,7 @@ import (
 	"github.com/wrxcode/deploy-server/worker/rollback"
 
 	log "github.com/sirupsen/logrus"
-	//"fmt"
+
 )
 
 type Worker struct {
@@ -43,31 +43,24 @@ func (this *Worker) DoWorker() {
 	}()
 
 	switch this.OrderType {
+		//构建处理
 	case ContructType:
-		this.doContruct()
+		//fmt.Println("contruct!!!",this.DataId, "\n\n\n")
+		construct.ContructImage(this.DataId)
 		break
+
+		//部署处理
 	case Deploy:
-		this.doDeploy()
+		//fmt.Println("deploy!!!",this.DataId, "\n\n\n")
+		deploy.Deploy()
 		break
+
+		//回滚处理
 	case RollBack:
-		this.doRollBack()
+		//fmt.Println("rooback!!!",this.DataId, "\n\n\n")
+		rollback.RollBack()
 		break
 	default:
 		log.Errorf("OrderType error: OrderType[%d] , DataId[%d]", this.OrderType, this.DataId)
 	}
-}
-
-func (this *Worker) doContruct() {
-	//param handing
-	construct.ContructImage(this.DataId)
-}
-
-func (this *Worker) doDeploy() {
-	//param handing
-	deploy.Deploy()
-}
-
-func (this *Worker) doRollBack() {
-	//param handing
-	rollback.RollBack()
 }

@@ -17,13 +17,14 @@ maxOpen = 10     # 最大打开连接数
 debug = false
 
 webAddr = "root:1721267632@tcp(localhost:3306)/deploy_web?charset=utf8&loc=Asia%2FShanghai&parseTime=true&wait_timeout=3600"
+#webAddr = "root:qweszxcsq@tcp(128.0.0.174:3306)/deploy_web?charset=utf8&loc=Asia%2FShanghai&parseTime=true&wait_timeout=3600"
 
 [jwt]
 encodeMethod = "HS256" # [HS256, HS384, HS512]
 maxEffectiveTime = 3  # 最大存活时间:天
 
 [nsq]
-lookupds = ["127.0.0.1:8000"]
+lookupds = ["xupt2.fightcoder.com:9001"]
 deployTopic = "deploy"
 deployChannel = "1.0.1"
 handlerCount = 5

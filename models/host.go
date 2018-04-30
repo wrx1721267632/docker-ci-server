@@ -5,9 +5,9 @@ import (
 )
 
 type Host struct {
-	Id       int64
-	HostName string
-	Ip       string
+	Id       int64  `json:"id" form:"id"`
+	HostName string `json:"host_name" form:"host_name"`
+	Ip       string `json:"ip" form:"ip"`
 }
 
 //增加

@@ -5,14 +5,14 @@ import (
 )
 
 type ConstructRecord struct {
-	Id             int64
-	AccountId      int64
-	ProjectId      int64
-	MirrorId       int64
-	ConstructStart int64
-	ConstructEnd   int64
-	ConstructStatu int
-	ConstructLog   string
+	Id             int64  `json:"id" form:"id"`
+	AccountId      int64  `json:"account_id" form:"account_id"`
+	ProjectId      int64  `json:"project_id" form:"project_id"`
+	MirrorId       int64  `json:"mirror_id" form:"mirror_id"`
+	ConstructStart int64  `json:"construct_start" form:"construct_start"`
+	ConstructEnd   int64  `json:"construct_end" form:"construct_end"`
+	ConstructStatu int    `json:"construct_statu" form:"construct_statu"`
+	ConstructLog   string `json:"construct_log" form:"construct_log"`
 }
 
 //增加
@@ -74,9 +74,53 @@ func (this ConstructRecord) QueryByAccountId(accountId int64) ([]*ConstructRecor
 //查询(所有数据）
 func (this ConstructRecord) QueryAllConstructRecord() ([]*ConstructRecord, error) {
 	constructRecordList := make([]*ConstructRecord, 0)
-	err := OrmWeb.Find(&constructRecordList)
+	err := OrmWeb.Desc("id").Find(&constructRecordList)
 	if err != nil {
 		return nil, err
 	}
 	return constructRecordList, nil
+}
+
+//查询(分页查询所有记录）
+func (this ConstructRecord) QueryAllConstructByPage(size int, start int) ([]*ConstructRecord, error) {
+	constructList := make([]*ConstructRecord, 0)
+	err := OrmWeb.Limit(size, start).Find(&constructList)
+	if err != nil {
+		return nil, err
+	}
+
+	return constructList, nil
+}
+
+func (this ConstructRecord) CountAllConstructByPage() (int64, error) {
+	sum, err := OrmWeb.Count(&ConstructRecord{})
+	if err != nil {
+		return 0, nil
+	}
+
+	return sum, nil
+}
+
+func (this ConstructRecord) GetByProjectId(projectId int64) (*ConstructRecord, error) {
+	constructRecord := &ConstructRecord{ProjectId: projectId}
+	has, err := OrmWeb.Desc("id").Get(constructRecord)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, nil
+	}
+	return constructRecord, nil
+}
+
+func (this ConstructRecord) GetByProjectIdAndStatu(projectId int64) (*ConstructRecord, error) {
+	constructRecord := &ConstructRecord{ProjectId: projectId, ConstructStatu: 2}
+	has, err := OrmWeb.Desc("id").Get(constructRecord)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, nil
+	}
+	return constructRecord, nil
 }

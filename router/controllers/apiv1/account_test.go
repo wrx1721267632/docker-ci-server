@@ -3,53 +3,53 @@ package apiv1
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/wrxcode/deploy-server/router/controllers/baseController"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/hjhcode/deploy-web/router/controllers/base"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLogin(t *testing.T) {
-	resp, err := http.Post("http://127.0.0.1:8000/apiv1/account/login",
+	resp, err := http.Post("http://127.0.0.1:8000/apiv1/login",
 		"application/x-www-form-urlencoded",
-		strings.NewReader("email=abcd.com&password=asdf"))
+		strings.NewReader("name=asdfr.com&password=asdfr"))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("POST请求失败: " + err.Error())
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("读取Response失败: " + err.Error())
 	}
 
-	var respT baseController.HttpResponse
+	var respT base.HttpResponse
 	if err := json.Unmarshal(body, &respT); err != nil {
-		fmt.Println(err)
+		fmt.Println("获取Body失败: " + err.Error())
 	}
 	assert.Equal(t, 0, respT.Code, "登录失败！")
 }
 
 func TestRegister(t *testing.T) {
-	resp, err := http.Post("http://127.0.0.1:8000/apiv1/account/register",
+	resp, err := http.Post("http://127.0.0.1:8000/apiv1/register",
 		"application/x-www-form-urlencoded",
-		strings.NewReader("email=abcd.com&password=asdf"))
+		strings.NewReader("name=ssdfr.com&password=ssdfr"))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("POST请求失败: " + err.Error())
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("读取Response失败: " + err.Error())
 	}
 
-	var respT baseController.HttpResponse
+	var respT base.HttpResponse
 	if err := json.Unmarshal(body, &respT); err != nil {
-		fmt.Println(err)
+		fmt.Println("获取Body失败: " + err.Error())
 	}
 	assert.Equal(t, 0, respT.Code, "注册失败！")
 }

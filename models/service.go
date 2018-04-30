@@ -5,16 +5,17 @@ import (
 )
 
 type Service struct {
-	Id              int64
-	AccountId       int64
-	ServiceName     string
-	ServiceDescribe string
-	HostList        string
-	MirrorList      string
-	DockerConfig    string
-	CreateDate      int64
-	UpdateDate      int64
-	ServiceMember   string
+	Id              int64  `json:"id" form:"id"`
+	AccountId       int64  `json:"account_id" form:"account_id"`
+	ServiceName     string `json:"service_name" form:"service_name"`
+	ServiceDescribe string `json:"service_describe" form:"service_describe"`
+	HostList        string `json:"host_list" form:"host_list"`
+	MirrorList      string `json:"mirror_list" form:"mirror_list"`
+	DockerConfig    string `json:"docker_config" form:"docker_config"`
+	CreateDate      int64  `json:"create_date" form:"create_date"`
+	UpdateDate      int64  `json:"update_date" form:"update_date"`
+	ServiceMember   string `json:"service_member" form:"service_member"`
+	IsDel           int    `json:"is_del" form:"is_del"`
 }
 
 //增加
@@ -88,7 +89,7 @@ func (this Service) QueryByAccountId(accountId int64) ([]*Service, error) {
 //查询(查询所有服务)
 func (this Service) QueryAllService() ([]*Service, error) {
 	serviceList := make([]*Service, 0)
-	err := OrmWeb.Find(&serviceList)
+	err := OrmWeb.Where("is_del != ?", 1).Find(&serviceList)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func (this Service) QueryAllService() ([]*Service, error) {
 //查询(分页查询所有服务）
 func (this Service) QueryAllServiceByPage(size int, start int) ([]*Service, error) {
 	serviceList := make([]*Service, 0)
-	err := OrmWeb.Limit(size, start).Find(&serviceList)
+	err := OrmWeb.Where("is_del != ?", 1).Limit(size, start).Find(&serviceList)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func (this Service) QueryAllServiceByPage(size int, start int) ([]*Service, erro
 	return serviceList, nil
 }
 
-func (this Service) CountAllServiceByPage() (int64, error) {
+func (this Service) CountAllService() (int64, error) {
 	sum, err := OrmWeb.Count(&Service{})
 	if err != nil {
 		return 0, nil
@@ -116,10 +117,9 @@ func (this Service) CountAllServiceByPage() (int64, error) {
 }
 
 //查询(根据服务名查询）
-func (this Service) QueryServiceBySearch(serviceName string, size int, start int) ([]*Service, error) {
+func (this Service) QueryServiceBySearch(serviceName string, service *Service) ([]*Service, error) {
 	serviceList := make([]*Service, 0)
-	err := OrmWeb.Where("service_name like ?", "%"+serviceName+"%").Limit(size, start).Find(
-		&serviceList)
+	err := OrmWeb.Where("service_name like ?", "%"+serviceName+"%").Find(&serviceList, service)
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (this Service) QueryServiceBySearch(serviceName string, size int, start int
 	return serviceList, nil
 }
 
-func (this Service) CountServiceBySearch(serviceName string) (int64, error) {
-	sum, err := OrmWeb.Where("service_name like ?", "%"+serviceName+"%").Count(&Service{})
+func (this Service) CountServiceBySearch(serviceName string, service *Service) (int64, error) {
+	sum, err := OrmWeb.Where("service_name like ?", "%"+serviceName+"%").Count(service)
 	if err != nil {
 		return 0, err
 	}

@@ -6,37 +6,51 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/wrxcode/deploy-server/managers"
-	"github.com/wrxcode/deploy-server/router/controllers/baseController"
+	"github.com/wrxcode/deploy-server/router/controllers/base"
 )
 
 func RegisterAccount(router *gin.RouterGroup) {
-	router.POST("account/login", httpHandlerLogin)
-	router.POST("account/register", httpHandlerRegister)
+	router.POST("login", httpHandlerLogin)
+	router.POST("register", httpHandlerRegister)
+}
+
+type AccountParam struct {
+	Name     string `form:"name" json:"name"`
+	Password string `form:"password" json:"password"`
 }
 
 func httpHandlerLogin(c *gin.Context) {
-	email := c.PostForm("email")
-	password := c.PostForm("password")
-	if flag, token, mess := managers.AccountLogin(email, password); flag == false {
-		c.JSON(http.StatusOK, (&baseController.Base{}).Fail(mess))
-	} else {
-		cookie := &http.Cookie{
-			Name:     "token",
-			Value:    base64.StdEncoding.EncodeToString([]byte(token)),
-			Path:     "/",
-			HttpOnly: true,
-		}
-		http.SetCookie(c.Writer, cookie)
-		c.JSON(http.StatusOK, (&baseController.Base{}).Success())
+	account := AccountParam{}
+	err := c.Bind(&account)
+	if err != nil {
+		panic(err)
 	}
+	token, err := managers.AccountLogin(account.Name, account.Password)
+	if err != nil {
+		c.JSON(http.StatusOK, base.Fail(err.Error()))
+		return
+	}
+	cookie := &http.Cookie{
+		Name:     "token",
+		Value:    base64.StdEncoding.EncodeToString([]byte(token)),
+		Path:     "/",
+		HttpOnly: true,
+	}
+
+	http.SetCookie(c.Writer, cookie)
+	c.JSON(http.StatusOK, base.Success())
 }
 
 func httpHandlerRegister(c *gin.Context) {
-	email := c.PostForm("email")
-	password := c.PostForm("password")
-	if flag, userId, mess := managers.AccountRegister(email, password); flag == false {
-		c.JSON(http.StatusOK, (&baseController.Base{}).Fail(mess))
-	} else {
-		c.JSON(http.StatusOK, (&baseController.Base{}).Success(userId))
+	account := AccountParam{}
+	err := c.Bind(&account)
+	if err != nil {
+		panic(err)
 	}
+	userId, err := managers.AccountRegister(account.Name, account.Password)
+	if err != nil {
+		c.JSON(http.StatusOK, base.Fail(err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, base.Success(userId))
 }
