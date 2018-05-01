@@ -95,6 +95,7 @@ CREATE TABLE `service` (
 	`create_date` bigint(20) NOT NULL COMMENT '服务创建时间',
 	`update_date` bigint(20) NOT NULL COMMENT '服务最后更新时间',
 	`service_member` varchar(500) default NULL COMMENT '服务成员列表',
+	`is_del` int(5) default '0' COMMENT '服务是否被删除',
 	PRIMARY KEY(`id`),
 	KEY `account_id` (`account_id`),
 	KEY `service_name` (`service_name`),
