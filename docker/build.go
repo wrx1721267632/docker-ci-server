@@ -73,29 +73,17 @@ func DockerBuild(gitPath string, projectName string, tag string, recordId int64)
 	//持续读入docker build的日志
 	scanner := bufio.NewScanner(outRead)
 	for scanner.Scan() {
-		fmt.Println("===")
-		fmt.Printf("%d , rewrite: %s\n", flag, scanner.Text())
-		//time.Sleep(1500 * time.Millisecond)
+		//fmt.Printf("%d , rewrite: %s\n", flag, scanner.Text())
 		str, err := rewriteDatabase(recordId, scanner.Text())
 		if err != nil {
 			log.Fatalf("%s ! construct record id:[%d]; error msg:[%v]", str, recordId, err)
 		}
 		if flag == 3 {
 			fmt.Println("end")
-			//fmt.Println(scanner.Text())
 			break
 		}
-		//fmt.Println(scanner.Text())
-		//fmt.Println("out-------")
-		//
-		//data, _ := ioutil.ReadAll(stdout)
-		//fmt.Println(string(data))
-		//
-		//fmt.Println("err-------")
-		//data, _ = ioutil.ReadAll(stderr)
-		//fmt.Println(string(data))
 	}
-	fmt.Println("aaaend")
+
 	if flag == 2 {
 		errstr := errbuf.String()
 		str, err := rewriteDatabase(recordId, errstr)
@@ -118,7 +106,6 @@ func DockerBuild(gitPath string, projectName string, tag string, recordId int64)
 
 // 重写数据库，将build日志重写入数据库
 func rewriteDatabase(recordId int64, constructLog string) (string, error) {
-	//log.Fatalf("rewrite: %s", constructLog)
 	record, err := models.ConstructRecord{}.GetById(recordId)
 	if err != nil {
 		return "rewriteDatabase: get construct_record error", err
