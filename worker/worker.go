@@ -52,7 +52,7 @@ func (this *Worker) DoWorker() {
 		//部署处理
 	case Deploy:
 		//fmt.Println("deploy!!!",this.DataId, "\n\n\n")
-		deploy.Deploy()
+		deploy.Deploy(this.DataId)
 		break
 
 		//回滚处理

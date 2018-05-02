@@ -172,8 +172,6 @@ func rewriteDatabase(recordId int64, constructLog string) (string, error) {
 //	fmt.Println("超时间")
 //	return errors.Errorf("time out")
 //}
-//
-//
 //return nil
 //	err := cmd.Run()
 //	if err != nil {
