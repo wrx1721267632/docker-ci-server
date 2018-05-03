@@ -11,29 +11,37 @@ import (
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/docker/go-connections/nat"
-	"fmt"
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"strings"
+
+	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 )
 
-type CreateContainerConf struct{
-	host 		string			//连接远程客户端的信息 eg：tcp://222.24.63.117:9000
-	projectName string			//工程名称，通过镜像名称解析出来
-	image 		string			//镜像名称
+// 创建镜像所使用的结构体
+type CreateContainerConf struct {
+	Host        string //连接远程客户端的信息 eg：tcp://222.24.63.117:9000
+	ServiceName string //服务名称，用作最后镜像名称
+	Image       string //镜像名称
 	//config所需参数
-	workDir 	string			//cmd执行的工作目录
-	hostName 	string			//容器的hostname
-	env 		[]string		//环境变量
-	cmd 		[]string		//cmd内容
+	WorkDir  string   //cmd执行的工作目录
+	HostName string   //容器的hostname
+	Env      []string //环境变量
+	Cmd      []string //cmd内容
 	//hostconfig所需参数
-	hostList 	[]string		//host:ip的格式，存入host对应ip的解析
-	dns 		[]string		//dns服务器ip地址
-	volume 		[]string		//path:hostpath，容器内部目录和宿主机目录的挂载
+	HostList []string //host:ip的格式，存入host对应ip的解析
+	Dns      []string //dns服务器ip地址
+	Volume   []string //path:hostpath，容器内部目录和宿主机目录的挂载
 	//config和hostconfig综合参数
-	expose 		[]string		//port:hostport，容器端口和宿主机端口的映射
+	Expose []string //port:hostport，容器端口和宿主机端口的映射
+}
+
+// 写入日志所用的json格式
+type LogJson struct {
+	machineId  int64  `json:"machine_id"`
+	machineLog string `json:"machine_log"`
 }
 
 // 创建远程连接的客户端
@@ -48,17 +56,17 @@ func newClient(host string) (*client.Client, error) {
 
 // 创建容器
 func CreateContainer(param CreateContainerConf) (string, error) {
-	cli, err := newClient(param.host)
+	cli, err := newClient(param.Host)
 	if err != nil {
 		return "", err
 	}
 
-	var exposePorts 	nat.PortSet
+	var exposePorts nat.PortSet
 	exposePorts = make(map[nat.Port]struct{})
 	var portBindings nat.PortMap
 	portBindings = make(map[nat.Port][]nat.PortBinding)
 	//获取config中的ExposedPorts和hostconfig中的PortBindings
-	for _, expose := range param.expose {
+	for _, expose := range param.Expose {
 		str := strings.Split(expose, ":")
 		if len(str) != 2 {
 			log.Errorln("expose param error: ", expose)
@@ -78,29 +86,29 @@ func CreateContainer(param CreateContainerConf) (string, error) {
 		}
 		portBindings[containerPort] = portBind
 	}
-	fmt.Println(exposePorts,"\n",portBindings)
+	fmt.Println(exposePorts, "\n", portBindings)
 
 	ctx := context.Background()
 	containerBody, err := cli.ContainerCreate(ctx,
 		&container.Config{
-			User:  		"root",
-			Image: 			param.image,
-			WorkingDir: 	param.workDir,
-			Hostname: 		param.hostName,
-			Env: 			param.env,
-			Cmd:   			param.cmd,
-			ExposedPorts:	exposePorts,
+			User:         "root",
+			Image:        param.Image,
+			WorkingDir:   param.WorkDir,
+			Hostname:     param.HostName,
+			Env:          param.Env,
+			Cmd:          param.Cmd,
+			ExposedPorts: exposePorts,
 		}, &container.HostConfig{
 			Resources: container.Resources{
 				NanoCPUs: 2,
 				Memory:   512000000,
 			},
-			ExtraHosts: param.hostList,
-			DNS: param.dns,
-			PortBindings: portBindings,
-			Binds: param.volume,
-			PublishAllPorts : true,
-		}, nil, param.projectName)
+			ExtraHosts:      param.HostList,
+			DNS:             param.Dns,
+			PortBindings:    portBindings,
+			Binds:           param.Volume,
+			PublishAllPorts: true,
+		}, nil, param.ServiceName)
 
 	if err != nil {
 		log.WithField("err", err.Error()).Error("docker container create failure")
@@ -127,7 +135,7 @@ func StopContainer(host string, containerID string) error {
 	if err != nil {
 		return err
 	}
-	timeout := time.Second * 10
+	timeout := time.Second * 20
 	err = cli.ContainerStop(context.Background(), containerID, &timeout)
 	return err
 }
@@ -193,32 +201,30 @@ func ListImages(host string) ([]types.ImageSummary, error) {
 // 获取pull 镜像时的json串格式
 type OutJson struct {
 	Status string `json:"status"`
-	Id string `json:"id"`
+	Id     string `json:"id"`
 }
 
 // 每一行日志信息的格式
 type RowJson struct {
 	JsonStr OutJson
-	Mess string
+	Mess    string
 }
 
-// 从私有仓库获取镜像
-func PullImage(host string, imageName string) error {
+func PullImage(host string, imageName string) (string, error) {
 	cli, err := newClient(host)
 	if err != nil {
-		return err
+		return "", err
 	}
 	ctx := context.Background()
 
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer out.Close()
 	fmt.Println("======")
 
-
-	list :=  make([]RowJson, 0)
+	list := make([]RowJson, 0)
 	scanner := bufio.NewScanner(out)
 	for scanner.Scan() {
 		//fmt.Printf("[%s]\n", scanner.Text())
@@ -248,14 +254,19 @@ func PullImage(host string, imageName string) error {
 			}
 		}
 		// 这里是写入数据库的内容
-		fmt.Println("=======上")
-		for _, row := range list {
-			fmt.Println(row.Mess)
-		}
-		fmt.Println("=======下")
+		//fmt.Println("=======上")
+		//for _, row := range list {
+		//	fmt.Println(row.Mess)
+		//}
+		//fmt.Println("=======下")
+	}
+	var mess string
+	for _, row := range list {
+		mess += row.Mess
+		mess += "\n"
 	}
 
-	return nil
+	return mess, nil
 }
 
 // 打印镜像日志

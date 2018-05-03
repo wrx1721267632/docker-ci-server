@@ -1,5 +1,5 @@
 /*
-@Time : 18-4-20 下午4:55 
+@Time : 18-4-20 下午4:55
 @Author : wangruixin
 @File : contruct.go
 */
@@ -9,12 +9,13 @@ package construct
 import (
 	"time"
 
-	"github.com/wrxcode/deploy-server/docker"
 	"github.com/wrxcode/deploy-server/commit"
+	"github.com/wrxcode/deploy-server/docker"
 	"github.com/wrxcode/deploy-server/models"
 
-	log "github.com/sirupsen/logrus"
 	"fmt"
+
+	log "github.com/sirupsen/logrus"
 	"github.com/wrxcode/deploy-server/common/g"
 )
 
@@ -24,11 +25,11 @@ const (
 )
 
 const (
-	ContructType 	= 	0
+	ContructType = 0
 )
 
 const (
-	GIT_LOGERROR = "Git repository address error, please check the input address!"
+	GIT_LOGERROR    = "Git repository address error, please check the input address!"
 	GIT_COMMITERROR = "Git content not have any different"
 )
 
@@ -40,7 +41,7 @@ func ContructImage(dataId int64) {
 		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, dataId, recordErr.Error())
 		return
 	}
-	if record == nil{
+	if record == nil {
 		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
 		return
 	}
@@ -51,7 +52,7 @@ func ContructImage(dataId int64) {
 		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, record.ProjectId, projectErr.Error())
 		return
 	}
-	if project == nil{
+	if project == nil {
 		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
 		return
 	}
@@ -71,7 +72,7 @@ func ContructImage(dataId int64) {
 			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, lastSuccConstruct.MirrorId, projectErr.Error())
 			return
 		}
-		if mirrorData == nil{
+		if mirrorData == nil {
 			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
 			return
 		}
@@ -91,7 +92,7 @@ func ContructImage(dataId int64) {
 	if lastSuccMirrorTag != "" && lastSuccMirrorTag == commitKey {
 		log.Errorf("the same Git repository commit: [%s]", commitKey)
 		writeDatabaseBack(record, CONTRUCE_FAIL, 0, GIT_COMMITERROR)
-		//return
+		return
 	}
 
 	//通过docker file + docker API 进行部署
@@ -125,7 +126,7 @@ func ContructImage(dataId int64) {
 	//拼接镜像名与私有仓库名，方便docker push使用
 	repoData := fmt.Sprintf("%s/%s", repo, project.ProjectName)
 
-	mirror := models.Mirror{0, repoData,commitKey, describe}
+	mirror := models.Mirror{0, repoData, commitKey, describe}
 	mirrorId, err := models.Mirror{}.Add(&mirror)
 	if err != nil {
 		log.Errorf("add sql error: OrderType[%d] , DataId[%d], ErrorReason[%v]", ContructType, dataId, err)
@@ -143,7 +144,7 @@ func writeDatabaseBack(construct *models.ConstructRecord, status int, mirrorId i
 		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, construct.Id, recordErr.Error())
 		return
 	}
-	if construct == nil{
+	if construct == nil {
 		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, construct.Id)
 		return
 	}
@@ -154,7 +155,7 @@ func writeDatabaseBack(construct *models.ConstructRecord, status int, mirrorId i
 	}
 
 	construct.ConstructStatu = status
-	construct.ConstructEnd 	 = time.Now().Unix()
+	construct.ConstructEnd = time.Now().Unix()
 
 	err := models.ConstructRecord{}.Update(construct)
 	if err != nil {
