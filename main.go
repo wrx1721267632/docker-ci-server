@@ -2,13 +2,15 @@ package main
 
 import (
 	"flag"
-	"github.com/wrxcode/deploy-server/common"
-	"github.com/wrxcode/deploy-server/router"
-	"github.com/TV4/graceful"
+	"fmt"
 	"net/http"
+
+	"github.com/TV4/graceful"
+	"github.com/wrxcode/deploy-server/common"
 	"github.com/wrxcode/deploy-server/common/g"
 	"github.com/wrxcode/deploy-server/dispatch"
-	"fmt"
+	"github.com/wrxcode/deploy-server/router"
+	"github.com/wrxcode/deploy-server/script"
 )
 
 func main() {
@@ -21,6 +23,8 @@ func main() {
 	router := router.GetRouter()
 
 	go dispatch.StartConsume()
+
+	go script.CheckContainer()
 
 	graceful.LogListenAndServe(&http.Server{
 		Addr:    fmt.Sprintf(":%d", g.Conf().Run.HTTPPort),

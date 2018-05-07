@@ -13,7 +13,6 @@ import (
 
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/docker/go-connections/nat"
@@ -86,7 +85,7 @@ func CreateContainer(param CreateContainerConf) (string, error) {
 		}
 		portBindings[containerPort] = portBind
 	}
-	fmt.Println(exposePorts, "\n", portBindings)
+	//fmt.Println(exposePorts, "\n", portBindings)
 
 	ctx := context.Background()
 	containerBody, err := cli.ContainerCreate(ctx,
@@ -222,7 +221,6 @@ func PullImage(host string, imageName string) (string, error) {
 		return "", err
 	}
 	defer out.Close()
-	fmt.Println("======")
 
 	list := make([]RowJson, 0)
 	scanner := bufio.NewScanner(out)

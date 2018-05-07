@@ -1,5 +1,5 @@
 /*
-@Time : 18-4-20 下午4:07 
+@Time : 18-4-20 下午4:07
 @Author : wangruixin
 @File : worker.go
 */
@@ -20,18 +20,19 @@ import (
 	"github.com/wrxcode/deploy-server/worker/rollback"
 
 	log "github.com/sirupsen/logrus"
-
+	delete2 "github.com/wrxcode/deploy-server/worker/deleteService"
 )
 
 type Worker struct {
-	OrderType	int 	`json:"order_type"`
-	DataId 	  	int64 	`json:"data_id"`
+	OrderType int   `json:"order_type"`
+	DataId    int64 `json:"data_id"`
 }
 
 const (
-	ContructType 	= 	0
-	Deploy			= 	1
-	RollBack		=	2
+	ConstructType = 0
+	Deploy        = 1
+	RollBack      = 2
+	Delete        = 3
 )
 
 // 具体指令处理函数
@@ -43,10 +44,10 @@ func (this *Worker) DoWorker() {
 	}()
 
 	switch this.OrderType {
-		//构建处理
-	case ContructType:
-		//fmt.Println("contruct!!!",this.DataId, "\n\n\n")
-		construct.ContructImage(this.DataId)
+	//构建处理
+	case ConstructType:
+		//fmt.Println("Construct!!!",this.DataId, "\n\n\n")
+		construct.ConstructImage(this.DataId)
 		break
 
 		//部署处理
@@ -58,7 +59,11 @@ func (this *Worker) DoWorker() {
 		//回滚处理
 	case RollBack:
 		//fmt.Println("rooback!!!",this.DataId, "\n\n\n")
-		rollback.RollBack()
+		rollback.Rollback(this.DataId)
+		break
+
+	case Delete:
+		delete2.DeleteService(this.DataId)
 		break
 	default:
 		log.Errorf("OrderType error: OrderType[%d] , DataId[%d]", this.OrderType, this.DataId)

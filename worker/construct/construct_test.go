@@ -1,9 +1,10 @@
 package construct
 
 import (
-"testing"
-"flag"
-"github.com/wrxcode/deploy-server/common"
+	"flag"
+	"testing"
+
+	"github.com/wrxcode/deploy-server/common"
 )
 
 func TestDockerPull(t *testing.T) {
@@ -11,5 +12,5 @@ func TestDockerPull(t *testing.T) {
 	flag.Parse()
 	common.Init(*cfgFile)
 
-	ContructImage(20)
+	ConstructImage(20)
 }

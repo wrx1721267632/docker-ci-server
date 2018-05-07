@@ -11,10 +11,27 @@ type Deploy struct {
 	DeployStart  int64  `json:"deploy_start" form:"deploy_start"`
 	DeployEnd    int64  `json:"deploy_end" form:"deploy_end"`
 	HostList     string `json:"host_list" form:"host_list"`
-	MirrorList   string `json:"mirror_list" form:"mirror_list"`
+	MirrorList   int64  `json:"mirror_list" form:"mirror_list"`
 	DockerConfig string `json:"docker_config" form:"docker_config"`
 	DeployStatu  int    `json:"deploy_statu" form:"deploy_statu"`
 	DeployLog    string `json:"deploy_log" form:"deploy_log"`
+}
+
+type DeployData struct {
+	Stage           []DeployStage `json:"stage"`
+	Stage_num       int           `json:"stage_num"`
+	Progress_status int           `json:"progress_status"`
+}
+
+type DeployStage struct {
+	Stage_status int             `json:"stage_status"`
+	Machine      []DeployMachine `json:"machine"`
+}
+
+type DeployMachine struct {
+	Id             int64  `json:"id"`
+	Machine_status int    `json:"machine_status"`
+	Step           string `json:"step"`
 }
 
 //增加

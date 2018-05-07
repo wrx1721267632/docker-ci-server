@@ -2,8 +2,11 @@ package deploy
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"testing"
+
+	"github.com/wrxcode/deploy-server/common"
 )
 
 func TestDeploy(t *testing.T) {
@@ -42,4 +45,25 @@ func TestDeploy(t *testing.T) {
 	str, err := json.Marshal(hostList)
 	fmt.Println(string(str), "    err:", err)
 
+	deploy_config := CreateContainerJson{
+		WorkerDir: "",
+		HostName:  "www.test.com",
+		HostList:  []string{"www.baidu.com:127.0.0.1"},
+		Env:       []string{},
+		Volume:    []string{"/root/registry:/var/lib/registry"},
+		Dns:       []string{"127.0.0.1", "114.114.114.114"},
+		Expose:    []string{"9003:80"},
+		Cmd:       []string{},
+	}
+
+	docker_str, err := json.Marshal(deploy_config)
+	fmt.Println(string(docker_str), "    err:", err)
+
+}
+
+func TestDeploy2(t *testing.T) {
+	cfgFile := flag.String("c", "../../cfg/cfg.toml.debug", "set config file")
+	flag.Parse()
+	common.Init(*cfgFile)
+	Deploy(1)
 }

@@ -1,7 +1,7 @@
 /*
 @Time : 18-4-20 下午4:55
 @Author : wangruixin
-@File : contruct.go
+@File : Construct.go
 */
 
 package construct
@@ -20,12 +20,12 @@ import (
 )
 
 const (
-	CONTRUCT_SUCC = 2
-	CONTRUCE_FAIL = 3
+	Construct_SUCC = 2
+	CONTRUCE_FAIL  = 3
 )
 
 const (
-	ContructType = 0
+	ConstructType = 0
 )
 
 const (
@@ -34,33 +34,33 @@ const (
 )
 
 //构建镜像的入口函数
-func ContructImage(dataId int64) {
+func ConstructImage(dataId int64) {
 	// 通过Nsq发送过来的构建记录表ID，来获取构建记录信息
 	record, recordErr := models.ConstructRecord{}.GetById(dataId)
 	if recordErr != nil {
-		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, dataId, recordErr.Error())
+		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ConstructType, dataId, recordErr.Error())
 		return
 	}
 	if record == nil {
-		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
+		log.Errorf("read construct record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ConstructType, dataId)
 		return
 	}
 
 	// 通过构建记录表的工程ID，来获取工程信息
 	project, projectErr := models.Project{}.GetById(record.ProjectId)
 	if projectErr != nil {
-		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, record.ProjectId, projectErr.Error())
+		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ConstructType, record.ProjectId, projectErr.Error())
 		return
 	}
 	if project == nil {
-		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
+		log.Errorf("read project sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ConstructType, dataId)
 		return
 	}
 
 	// 通过工程ID,来获取对应工程最后一次次构建成功的构建记录ID
 	lastSuccConstruct, lastConstructErr := models.ConstructRecord{}.GetByProjectIdAndStatu(record.ProjectId)
 	if lastConstructErr != nil {
-		log.Errorf("read sql the project last success construct record error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, dataId, projectErr.Error())
+		log.Errorf("read sql the project last success construct record error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ConstructType, dataId, projectErr.Error())
 		return
 	}
 
@@ -69,11 +69,11 @@ func ContructImage(dataId int64) {
 	if lastSuccConstruct != nil {
 		mirrorData, mirrorErr := models.Mirror{}.GetById(lastSuccConstruct.MirrorId)
 		if mirrorErr != nil {
-			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, lastSuccConstruct.MirrorId, projectErr.Error())
+			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ConstructType, lastSuccConstruct.MirrorId, projectErr.Error())
 			return
 		}
 		if mirrorData == nil {
-			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, dataId)
+			log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ConstructType, dataId)
 			return
 		}
 
@@ -129,11 +129,11 @@ func ContructImage(dataId int64) {
 	mirror := models.Mirror{0, repoData, commitKey, describe}
 	mirrorId, err := models.Mirror{}.Add(&mirror)
 	if err != nil {
-		log.Errorf("add sql error: OrderType[%d] , DataId[%d], ErrorReason[%v]", ContructType, dataId, err)
+		log.Errorf("add sql error: OrderType[%d] , DataId[%d], ErrorReason[%v]", ConstructType, dataId, err)
 		return
 	}
 
-	writeDatabaseBack(record, CONTRUCT_SUCC, mirrorId, "")
+	writeDatabaseBack(record, Construct_SUCC, mirrorId, "")
 	return
 }
 
@@ -141,14 +141,14 @@ func ContructImage(dataId int64) {
 func writeDatabaseBack(construct *models.ConstructRecord, status int, mirrorId int64, constructLog string) {
 	construct, recordErr := models.ConstructRecord{}.GetById(construct.Id)
 	if recordErr != nil {
-		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ContructType, construct.Id, recordErr.Error())
+		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]", ConstructType, construct.Id, recordErr.Error())
 		return
 	}
 	if construct == nil {
-		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ContructType, construct.Id)
+		log.Errorf("read sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]", ConstructType, construct.Id)
 		return
 	}
-	if status == CONTRUCT_SUCC {
+	if status == Construct_SUCC {
 		construct.MirrorId = mirrorId
 	} else {
 		construct.ConstructLog += constructLog

@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	ContructType = 1
+	DeployType = 1
 )
 
 type MachineJson struct {
@@ -31,7 +31,7 @@ type StageJson struct {
 	Machine     []MachineJson `json:"machine"`
 }
 
-//机器列表的json
+//部署表中机器列表的json
 type MachineListJson struct {
 	Stage          []StageJson `json:"stage"`
 	StageNum       int         `json:"stage_num"`
@@ -61,6 +61,7 @@ const (
 	STAGE_DOING = 1
 	STAGE_SUCC  = 2
 	STAGE_ERR   = 3
+	STAGE_BACK  = 4  //回滚状态
 	STAGE_UNUSE = -1 //不修改stage状态
 )
 
@@ -70,48 +71,62 @@ const (
 	MACHINE_ERR   = 2
 	MACHINE_SKIP  = 3
 	MACHINE_SUCC  = 4
+	MACHINE_BACK  = 5 //回滚状态
 )
 
 func Deploy(dataId int64) {
 	//通过dataID获取到对应部署日志表的信息
 	deploy, deployErr := models.Deploy{}.GetById(dataId)
 	if deployErr != nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", ContructType, dataId, deployErr.Error())
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, dataId, deployErr.Error())
 		return
 	}
 	if deploy == nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", ContructType, dataId)
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", DeployType, dataId)
 		return
 	}
 
+	//通过deploy中的serviceId找到对应service信息
 	service, serviceErr := models.Service{}.GetById(deploy.ServiceId)
 	if serviceErr != nil {
-		log.Errorf("read service sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", ContructType, dataId, deployErr.Error())
+		log.Errorf("read service sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, dataId, serviceErr.Error())
 		return
 	}
 	if service == nil {
-		log.Errorf("read service sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", ContructType, dataId)
+		log.Errorf("read service sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", DeployType, dataId)
 		return
 	}
 
-	//image, imageErr := models.Mirror{}.GetById(deploy.MirrorId)
+	//通过deploy中的MirrorList字段找到对应部署所需要的镜像
+	image, imageErr := models.Mirror{}.GetById(deploy.MirrorList)
+	if imageErr != nil {
+		log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, deploy.MirrorList, imageErr.Error())
+		return
+	}
+	if image == nil {
+		log.Errorf("read mirror sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", DeployType, deploy.MirrorList)
+		return
+	}
+
+	//通过镜像名获取镜像信息，imagename:tag(projectName:GitCommit)
+	imageName := fmt.Sprintf("%s:%s", image.MirrorName, image.MirrorVersion)
 
 	// 解析机器列表
 	var machineList MachineListJson
 	err := json.Unmarshal([]byte(deploy.HostList), &machineList)
 	if err != nil {
-		log.Errorf("deploy hostlist json error: OrderType[%d] , DataId[%d], hostlist[%s], ErrorReason[%s]\n", ContructType, dataId, deploy.HostList, err.Error())
+		log.Errorf("deploy hostlist json error: OrderType[%d] , DataId[%d], hostlist[%s], ErrorReason[%s]\n", DeployType, dataId, deploy.HostList, err.Error())
 		return
 	}
 
-	machineNum, machineSuccNum := getMachineSum(machineList)
+	machineNum, machineSuccNum := GetMachineSum(machineList)
 	fmt.Println(machineNum, machineSuccNum)
 
 	// 解析dockerconfig，用来做构建镜像
 	var dockerConf CreateContainerJson
 	err = json.Unmarshal([]byte(deploy.DockerConfig), &dockerConf)
 	if err != nil {
-		log.Errorf("deploy docker config json error: OrderType[%d] , DataId[%d], docker config[%s], ErrorReason[%s]\n", ContructType, dataId, deploy.DockerConfig, err.Error())
+		log.Errorf("deploy docker config json error: OrderType[%d] , DataId[%d], docker config[%s], ErrorReason[%s]\n", DeployType, dataId, deploy.DockerConfig, err.Error())
 		return
 	}
 
@@ -129,7 +144,7 @@ func Deploy(dataId int64) {
 			deploy.HostList = string(hostList)
 			deployErr = models.Deploy{}.Update(deploy)
 			if deployErr != nil {
-				log.Errorf("rewrite deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", ContructType, dataId, deployErr.Error())
+				log.Errorf("rewrite deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, dataId, deployErr.Error())
 				return
 			}
 
@@ -138,44 +153,50 @@ func Deploy(dataId int64) {
 			}
 
 			for machineId, machine := range stage.Machine {
-				if machine.MachineStatus == MACHINE_DOING {
-					// 获取机器信息
-					machineInfo, err := models.Host{}.GetById(machine.Id)
-					if err != nil {
-						log.Errorf("get host sql error: machineId[%d], ErrReason[%s]\n", machine.Id, err.Error())
-						//machineList.Stage[stageId].Machine[machineId].MachineStatus = MACHINE_ERR
-						//machineList.Stage[stageId].StageStatus = STAGE_ERR
-						//rewriteDeployHostList(dataId, stageId, STAGE_ERR, machineId, MACHINE_ERR)
-						return
-					}
-					if machineInfo == nil {
-						log.Errorf("get host sql error: machineId[%d], ErrReason[no id in sql]\n", machine.Id)
-						return
-					}
+				// 获取机器信息
+				machineInfo, err := models.Host{}.GetById(machine.Id)
+				if err != nil {
+					log.Errorf("get host sql error: machineId[%d], ErrReason[%s]\n", machine.Id, err.Error())
+					//machineList.Stage[stageId].Machine[machineId].MachineStatus = MACHINE_ERR
+					//machineList.Stage[stageId].StageStatus = STAGE_ERR
+					//RewriteDeployHostList(dataId, stageId, STAGE_ERR, machineId, MACHINE_ERR)
+					return
+				}
+				if machineInfo == nil {
+					log.Errorf("get host sql error: machineId[%d], ErrReason[no id in sql]\n", machine.Id)
+					return
+				}
 
+				if machine.MachineStatus == MACHINE_SKIP {
+					logStrAdd := fmt.Sprintln("\n\n\n", machineInfo.Ip, "\n\n\n", "skip the machine")
+					RewriteDeployLog(deploy.Id, logStrAdd)
+					continue
+				}
+				if machine.MachineStatus == MACHINE_DOING {
 					//处理到某一台机器时先向打印其host
 					logStrAdd := fmt.Sprintln("\n\n\n", machineInfo.Ip, "\n\n\n")
-					rewriteDeployLog(deploy.Id, logStrAdd)
+					RewriteDeployLog(deploy.Id, logStrAdd)
 
 					//获取对应主机上的容器信息
 					containerList, err := docker.ListContainers(machineInfo.Ip)
 					if err != nil {
 						log.Errorf("get listContainers err: Ip[%s], ErrReason[%s]\n", machineInfo.Ip, err.Error())
-						rewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
+						RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}
 					//获取的容器名会加'/'作为前缀，需加上
-					name := fmt.Sprintf("/", service.ServiceName)
+					name := fmt.Sprintf("/%s", service.ServiceName)
 					for _, containerInfo := range containerList {
 						if name == containerInfo.Names[0] {
+							fmt.Println(name)
 							err = docker.StopContainer(machineInfo.Ip, service.ServiceName)
 							if err != nil {
-								rewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
+								RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 								return
 							}
 							err = docker.RemoveContainer(machineInfo.Ip, service.ServiceName, true, false, false)
 							if err != nil {
-								rewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
+								RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 								return
 							}
 						}
@@ -185,21 +206,22 @@ func Deploy(dataId int64) {
 					//fmt.Println(containerList)
 
 					//进行到pull容器的步骤
-					rewriteDeployStep(deploy.Id, stageId, machineId, STEP_PULL)
-					logStrAdd, err = docker.PullImage(machineInfo.Ip, deploy.MirrorList)
-					rewriteDeployLog(deploy.Id, logStrAdd)
+					RewriteDeployLog(deploy.Id, "\npull images\n")
+					RewriteDeployStep(deploy.Id, stageId, machineId, STEP_PULL)
+					logStrAdd, err = docker.PullImage(machineInfo.Ip, imageName)
+					RewriteDeployLog(deploy.Id, logStrAdd)
 					if err != nil {
-						rewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
+						RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}
 
 					//进行到创建容器的步骤
-					rewriteDeployStep(deploy.Id, stageId, machineId, STEP_CREATE)
+					RewriteDeployStep(deploy.Id, stageId, machineId, STEP_CREATE)
 
 					createParam := docker.CreateContainerConf{
 						Host:        machineInfo.Ip,
 						ServiceName: service.ServiceName,
-						Image:       deploy.MirrorList,
+						Image:       imageName,
 						HostName:    dockerConf.HostName,
 						Volume:      dockerConf.Volume,
 						Expose:      dockerConf.Expose,
@@ -210,39 +232,43 @@ func Deploy(dataId int64) {
 						Dns:         dockerConf.Dns,
 					}
 
-					_, err = docker.CreateContainer(createParam)
+					containerId, err := docker.CreateContainer(createParam)
 					if err != nil {
-						rewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
+						RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}
+					RewriteDeployLog(deploy.Id, fmt.Sprintf("\ncreate container: %s\n", containerId))
 
-					rewriteDeployStep(deploy.Id, stageId, machineId, STEP_START)
+					//进行启动容器的步骤
+					RewriteDeployLog(deploy.Id, "\nstart container\n")
+					RewriteDeployStep(deploy.Id, stageId, machineId, STEP_START)
 					err = docker.StartContainer(machineInfo.Ip, service.ServiceName)
 					if err != nil {
-						rewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
+						RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}
+					RewriteDeployLog(deploy.Id, "\nstart container succ\n")
 				}
 
 				machineSuccNum++
 				progessStatus := machineSuccNum * 100 / machineNum
-				rewriteDeployHostList(deploy.Id, stageId, STAGE_UNUSE, machineId, MACHINE_ERR, "", progessStatus)
+				RewriteDeployHostList(deploy.Id, stageId, STAGE_UNUSE, machineId, MACHINE_SUCC, "", progessStatus)
 			}
-			rewriteDeployHostList(deploy.Id, stageId, STAGE_SUCC, -1, -1, "", -1)
+			RewriteDeployHostList(deploy.Id, stageId, STAGE_SUCC, -1, -1, "", -1)
 			break
 		}
 	}
 
 }
 
-func rewriteDeployLog(deployId int64, logStrAdd string) {
+func RewriteDeployLog(deployId int64, logStrAdd string) {
 	deploy, deployErr := models.Deploy{}.GetById(deployId)
 	if deployErr != nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", ContructType, deployId, deployErr.Error())
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, deployId, deployErr.Error())
 		return
 	}
 	if deploy == nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", ContructType, deployId)
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", DeployType, deployId)
 		return
 	}
 	deploy.DeployLog += logStrAdd
@@ -254,21 +280,21 @@ func rewriteDeployLog(deployId int64, logStrAdd string) {
 }
 
 //修改并回写
-func rewriteDeployStep(deployId int64, stageId int, machineId int, step string) {
+func RewriteDeployStep(deployId int64, stageId int, machineId int, step string) {
 	deploy, deployErr := models.Deploy{}.GetById(deployId)
 	if deployErr != nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", ContructType, deployId, deployErr.Error())
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, deployId, deployErr.Error())
 		return
 	}
 	if deploy == nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", ContructType, deployId)
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", DeployType, deployId)
 		return
 	}
 	// 解析机器列表
 	var machineList MachineListJson
 	err := json.Unmarshal([]byte(deploy.HostList), &machineList)
 	if err != nil {
-		log.Errorf("deploy hostlist json error: OrderType[%d] , DataId[%d], hostlist[%s], ErrorReason[%s]\n", ContructType, deployId, deploy.HostList, err.Error())
+		log.Errorf("deploy hostlist json error: OrderType[%d] , DataId[%d], hostlist[%s], ErrorReason[%s]\n", DeployType, deployId, deploy.HostList, err.Error())
 		return
 	}
 	machineList.Stage[stageId].Machine[machineId].Step = step
@@ -285,21 +311,21 @@ func rewriteDeployStep(deployId int64, stageId int, machineId int, step string) 
 }
 
 // 修改并回写hostlist字段中的stage状态和machine状态
-func rewriteDeployHostList(deployId int64, stageId int, stageStatus int, machineId int, machineStatus int, logStrAdd string, progessStatus int) {
+func RewriteDeployHostList(deployId int64, stageId int, stageStatus int, machineId int, machineStatus int, logStrAdd string, progessStatus int) {
 	deploy, deployErr := models.Deploy{}.GetById(deployId)
 	if deployErr != nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", ContructType, deployId, deployErr.Error())
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, deployId, deployErr.Error())
 		return
 	}
 	if deploy == nil {
-		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", ContructType, deployId)
+		log.Errorf("read deploy record sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", DeployType, deployId)
 		return
 	}
 	// 解析机器列表
 	var machineList MachineListJson
 	err := json.Unmarshal([]byte(deploy.HostList), &machineList)
 	if err != nil {
-		log.Errorf("deploy hostlist json error: OrderType[%d] , DataId[%d], hostlist[%s], ErrorReason[%s]\n", ContructType, deployId, deploy.HostList, err.Error())
+		log.Errorf("deploy hostlist json error: OrderType[%d] , DataId[%d], hostlist[%s], ErrorReason[%s]\n", DeployType, deployId, deploy.HostList, err.Error())
 		return
 	}
 
@@ -332,7 +358,7 @@ func rewriteDeployHostList(deployId int64, stageId int, stageStatus int, machine
 }
 
 //获取主机列表中总共的机器个数（用作百分比的分母）和已经部署成功的机器个数（用作百分比分子的基数）
-func getMachineSum(machineList MachineListJson) (int, int) {
+func GetMachineSum(machineList MachineListJson) (int, int) {
 	//机器总数
 	machineNum := 0
 	//已经部署成功的机器数
