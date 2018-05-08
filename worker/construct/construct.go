@@ -106,7 +106,7 @@ func ConstructImage(dataId int64) {
 	//push到私有仓库
 	str, err := docker.DockerPush(project.ProjectName, commitKey)
 	if err != nil {
-		log.Fatalf("docker push err: ret[%s], reason[%v]", str, err)
+		log.Errorf("docker push err: ret[%s], reason[%v]", str, err)
 		writeDatabaseBack(record, CONTRUCE_FAIL, 0, str)
 		return
 	}
@@ -119,7 +119,7 @@ func ConstructImage(dataId int64) {
 		repo = g.Conf().Repo.Ip
 	}
 	if repo == "" {
-		log.Fatalf("config file error:[repo]")
+		log.Errorf("config file error:[repo]")
 		return
 	}
 	repo = fmt.Sprintf("%s:%s", repo, g.Conf().Repo.Port)

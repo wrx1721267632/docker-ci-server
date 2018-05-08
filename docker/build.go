@@ -76,7 +76,7 @@ func DockerBuild(gitPath string, projectName string, tag string, recordId int64)
 		//fmt.Printf("%d , rewrite: %s\n", flag, scanner.Text())
 		str, err := rewriteDatabase(recordId, scanner.Text())
 		if err != nil {
-			log.Fatalf("%s ! construct record id:[%d]; error msg:[%v]", str, recordId, err)
+			log.Errorf("%s ! construct record id:[%d]; error msg:[%v]", str, recordId, err)
 		}
 		if flag == 3 {
 			fmt.Println("end")
@@ -88,15 +88,15 @@ func DockerBuild(gitPath string, projectName string, tag string, recordId int64)
 		errstr := errbuf.String()
 		str, err := rewriteDatabase(recordId, errstr)
 		if err != nil {
-			log.Fatalf("%s ! construct record id:[%d]; error msg:[%v]", str, recordId, err)
+			log.Errorf("%s ! construct record id:[%d]; error msg:[%v]", str, recordId, err)
 		}
 		return errors.Errorf("docker build error!!!")
 	}
 
 	if flag == 3 {
-		str, err := rewriteDatabase(recordId, "\n\ndocker build time out\n")
+		str, err := rewriteDatabase(recordId, "<br><br>docker build time out<br><br>")
 		if err != nil {
-			log.Fatalf("%s ! construct record id:[%d]; error msg:[%v]", str, recordId, err)
+			log.Errorf("%s ! construct record id:[%d]; error msg:[%v]", str, recordId, err)
 		}
 		return errors.Errorf("docker build time out!!!")
 	}
@@ -112,7 +112,7 @@ func rewriteDatabase(recordId int64, constructLog string) (string, error) {
 	}
 
 	record.ConstructLog += constructLog
-	record.ConstructLog += "\n"
+	record.ConstructLog += "<br>"
 	err = models.ConstructRecord{}.Update(record)
 	if err != nil {
 		return "rewriteDatabase: update construct_record error", err
