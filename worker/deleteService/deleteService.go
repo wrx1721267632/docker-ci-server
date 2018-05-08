@@ -85,9 +85,9 @@ func DeleteService(dataId int64) {
 						//RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}
-					err = docker.RemoveContainer(machineInfo.Ip, service.ServiceName, true, true, true)
+					err = docker.RemoveContainer(machineInfo.Ip, service.ServiceName, true, false, false)
 					if err != nil {
-						log.Errorf("stop Containers err: Ip[%s], ErrReason[%s]\n", machineInfo.Ip, err.Error())
+						log.Errorf("remove Containers err: Ip[%s], ErrReason[%s]\n", machineInfo.Ip, err.Error())
 						//RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}

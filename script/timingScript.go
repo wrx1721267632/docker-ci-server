@@ -30,7 +30,7 @@ type MachineListJson struct {
 func CheckContainer() {
 	for {
 		//定时一分钟执行一次
-		time.Sleep(60 * time.Second)
+		time.Sleep(10 * time.Second)
 
 		serviceAll, err := models.Service{}.QueryAllService()
 		if err != nil {
@@ -39,6 +39,7 @@ func CheckContainer() {
 		}
 
 		for _, service := range serviceAll {
+			fmt.Println("start")
 			// 解析机器列表
 			var machineList MachineListJson
 			err = json.Unmarshal([]byte(service.HostList), &machineList)
@@ -64,18 +65,24 @@ func CheckContainer() {
 					containerList, err := docker.ListContainers(machineInfo.Ip)
 					if err != nil {
 						log.Errorf("get listContainers err: Ip[%s], ErrReason[%s]\n", machineInfo.Ip, err.Error())
+						machineList.Stage[stageId].Machine[machineId].ContainerStatus = err.Error()
 						continue
 					}
 
 					//获取的容器名会加'/'作为前缀，需加上
 					name := fmt.Sprintf("/%s", service.ServiceName)
 
+					flag := false
 					for _, containerInfo := range containerList {
 						if name == containerInfo.Names[0] {
 							machineList.Stage[stageId].Machine[machineId].ContainerStatus = containerInfo.State
-						} else {
-							machineList.Stage[stageId].Machine[machineId].ContainerStatus = "There is no container in the machine！"
+							flag = true
+							break
 						}
+					}
+
+					if flag == false {
+						machineList.Stage[stageId].Machine[machineId].ContainerStatus = "There is no container in the machine!"
 					}
 				}
 			}
@@ -92,6 +99,7 @@ func CheckContainer() {
 				log.Errorf("rewrite service record sql error: ErrorReason[%s]", err)
 				continue
 			}
+			fmt.Println("end")
 		}
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"strings"
+
 	"github.com/wrxcode/deploy-server/common"
 )
 
@@ -53,7 +55,7 @@ func TestDeploy(t *testing.T) {
 		Volume:    []string{"/root/registry:/var/lib/registry"},
 		Dns:       []string{"127.0.0.1", "114.114.114.114"},
 		Expose:    []string{"9003:80"},
-		Cmd:       []string{},
+		//Cmd:       []string{},
 	}
 
 	docker_str, err := json.Marshal(deploy_config)
@@ -66,4 +68,9 @@ func TestDeploy2(t *testing.T) {
 	flag.Parse()
 	common.Init(*cfgFile)
 	Deploy(1)
+}
+
+func TestDeploy3(t *testing.T) {
+	//var cmdArr []string
+	fmt.Println(strings.Fields("a  b   c    d"))
 }

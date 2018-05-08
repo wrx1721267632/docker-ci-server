@@ -11,6 +11,8 @@ import (
 
 	"fmt"
 
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/wrxcode/deploy-server/docker"
 	"github.com/wrxcode/deploy-server/models"
@@ -47,7 +49,7 @@ type CreateContainerJson struct {
 	Volume    []string `json:"Volume"`
 	Dns       []string `json:"dns"`
 	Expose    []string `json:"expose"`
-	Cmd       []string `json:"cmd"`
+	Cmd       string   `json:"cmd"`
 }
 
 const (
@@ -128,6 +130,12 @@ func Deploy(dataId int64) {
 	if err != nil {
 		log.Errorf("deploy docker config json error: OrderType[%d] , DataId[%d], docker config[%s], ErrorReason[%s]\n", DeployType, dataId, deploy.DockerConfig, err.Error())
 		return
+	}
+
+	//解析，讲输入的cmd字符串以空格切分为字符串数组格式
+	var cmdArr []string
+	if len(dockerConf.Cmd) > 0 {
+		cmdArr = strings.Fields(dockerConf.Cmd)
 	}
 
 	// 部署操作
@@ -228,7 +236,7 @@ func Deploy(dataId int64) {
 						HostList:    dockerConf.HostList,
 						WorkDir:     dockerConf.WorkerDir,
 						Env:         dockerConf.Env,
-						Cmd:         dockerConf.Cmd,
+						Cmd:         cmdArr,
 						Dns:         dockerConf.Dns,
 					}
 
