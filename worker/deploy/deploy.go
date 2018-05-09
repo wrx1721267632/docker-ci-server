@@ -24,7 +24,8 @@ const (
 
 type MachineJson struct {
 	Id            int64  `json:"id"`
-	Step          string `json:"Step"`
+	Step          string `json:"step"`
+	Name          string `json:"name"`
 	MachineStatus int    `json:"machine_status"`
 }
 
@@ -176,14 +177,15 @@ func Deploy(dataId int64) {
 				}
 
 				if machine.MachineStatus == MACHINE_SKIP {
-					logStrAdd := fmt.Sprintln("\n\n\n", machineInfo.Ip, "\n\n\n", "skip the machine")
+					logStrAdd := fmt.Sprintln(machineInfo.Ip, "skip the machine")
 					RewriteDeployLog(deploy.Id, logStrAdd)
 					continue
 				}
-				if machine.MachineStatus == MACHINE_DOING {
+				if machine.MachineStatus == MACHINE_WAIT {
 					//处理到某一台机器时先向打印其host
-					logStrAdd := fmt.Sprintln("\n\n\n", machineInfo.Ip, "\n\n\n")
-					RewriteDeployLog(deploy.Id, logStrAdd)
+					logStrAdd := fmt.Sprintln(machineInfo.Ip)
+					//RewriteDeployLog(deploy.Id, logStrAdd)
+					RewriteDeployHostList(deploy.Id, stageId, -1, machineId, MACHINE_DOING, logStrAdd, -1)
 
 					//获取对应主机上的容器信息
 					containerList, err := docker.ListContainers(machineInfo.Ip)
@@ -214,7 +216,7 @@ func Deploy(dataId int64) {
 					//fmt.Println(containerList)
 
 					//进行到pull容器的步骤
-					RewriteDeployLog(deploy.Id, "\npull images\n")
+					RewriteDeployLog(deploy.Id, "pull images")
 					RewriteDeployStep(deploy.Id, stageId, machineId, STEP_PULL)
 					logStrAdd, err = docker.PullImage(machineInfo.Ip, imageName)
 					RewriteDeployLog(deploy.Id, logStrAdd)
@@ -245,17 +247,17 @@ func Deploy(dataId int64) {
 						RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}
-					RewriteDeployLog(deploy.Id, fmt.Sprintf("\ncreate container: %s\n", containerId))
+					RewriteDeployLog(deploy.Id, fmt.Sprintf("create container: %s", containerId))
 
 					//进行启动容器的步骤
-					RewriteDeployLog(deploy.Id, "\nstart container\n")
+					RewriteDeployLog(deploy.Id, "start container")
 					RewriteDeployStep(deploy.Id, stageId, machineId, STEP_START)
 					err = docker.StartContainer(machineInfo.Ip, service.ServiceName)
 					if err != nil {
 						RewriteDeployHostList(deploy.Id, stageId, STAGE_ERR, machineId, MACHINE_ERR, err.Error(), -1)
 						return
 					}
-					RewriteDeployLog(deploy.Id, "\nstart container succ\n")
+					RewriteDeployLog(deploy.Id, "start container succ")
 				}
 
 				machineSuccNum++
@@ -280,6 +282,7 @@ func RewriteDeployLog(deployId int64, logStrAdd string) {
 		return
 	}
 	deploy.DeployLog += logStrAdd
+	deploy.DeployLog += "<br>"
 	deployErr = models.Deploy{}.Update(deploy)
 	if deployErr != nil {
 		log.Errorf("rewrite deploy record sql error: DataId[%d], ErrorReason[%s]", deploy.Id, deployErr)
@@ -347,6 +350,27 @@ func RewriteDeployHostList(deployId int64, stageId int, stageStatus int, machine
 		machineList.Stage[stageId].StageStatus = stageStatus
 	}
 
+	if stageStatus == STAGE_SUCC && stageId == 2 {
+		deploy.DeployStatu = 3
+	}
+
+	//表示部署或回滚成功
+	if stageStatus == STAGE_BACK && stageId == 2 {
+		deploy.DeployStatu = 3
+		service, serviceErr := models.Service{}.GetById(deploy.ServiceId)
+		if serviceErr != nil {
+			log.Errorf("read service sql error: OrderType[%d] , DataId[%d], ErrorReason[%s]\n", DeployType, deploy.ServiceId, serviceErr.Error())
+		}
+		if service == nil {
+			log.Errorf("read service sql error: OrderType[%d] , DataId[%d], ErrorReason[no id in sql]\n", DeployType, deploy.ServiceId)
+		}
+		service.ServiceStatu = 1
+		serviceErr = models.Service{}.Update(service)
+		if serviceErr != nil {
+			log.Errorf("rewrite service sql error: DataId[%d], ErrorReason[%s]", service.Id, serviceErr)
+		}
+	}
+
 	if progessStatus != -1 {
 		machineList.ProgressStatus = progessStatus
 	}
@@ -359,6 +383,7 @@ func RewriteDeployHostList(deployId int64, stageId int, stageStatus int, machine
 	}
 	deploy.HostList = string(hostList)
 	deploy.DeployLog += logStrAdd
+	deploy.DeployLog += "<br>"
 	deployErr = models.Deploy{}.Update(deploy)
 	if deployErr != nil {
 		log.Errorf("rewrite deploy record sql error: DataId[%d], ErrorReason[%s]", deploy.Id, deployErr)

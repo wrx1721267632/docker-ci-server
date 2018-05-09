@@ -14,6 +14,7 @@ import (
 
 type MachineJson struct {
 	Id              int64  `json:"id"`
+	Name            string `json:"name"`
 	ContainerStatus string `json:"container_status"`
 }
 
@@ -76,6 +77,13 @@ func CheckContainer() {
 					for _, containerInfo := range containerList {
 						if name == containerInfo.Names[0] {
 							machineList.Stage[stageId].Machine[machineId].ContainerStatus = containerInfo.State
+							if containerInfo.State != "running" {
+								err = docker.StartContainer(machineInfo.Ip, service.ServiceName)
+								if err != nil {
+									log.Printf("restart the container: host[%s], service[%s]\n", machineInfo.Ip, service.ServiceName)
+									return
+								}
+							}
 							flag = true
 							break
 						}

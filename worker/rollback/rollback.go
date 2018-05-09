@@ -121,16 +121,16 @@ func Rollback(dataId int64) {
 					//machineList.Stage[stageId].Machine[machineId].MachineStatus = MACHINE_ERR'
 					//machineList.Stage[stageId].StageStatus = STAGE_ERR
 					//RewriteDeployHostList(dataId, stageId, STAGE_ERR, machineId, MACHINE_ERR)
-					return
+					continue
 				}
 				if machineInfo == nil {
 					log.Errorf("get host sql error: machineId[%d], ErrReason[no id in sql]\n", machine.Id)
-					return
+					continue
 				}
 
 				if machine.MachineStatus != deploy.MACHINE_WAIT {
 					//处理到某一台机器时先向打印其host
-					logStrAdd := fmt.Sprintln("\n\n\n", machineInfo.Ip, "\n\n\n")
+					logStrAdd := fmt.Sprintln(machineInfo.Ip)
 					deploy.RewriteDeployLog(deployInfo.Id, logStrAdd)
 
 					//获取对应主机上的容器信息
@@ -138,7 +138,7 @@ func Rollback(dataId int64) {
 					if err != nil {
 						log.Errorf("get listContainers err: Ip[%s], ErrReason[%s]\n", machineInfo.Ip, err.Error())
 						deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_ERR, machineId, deploy.MACHINE_ERR, err.Error(), -1)
-						return
+						continue
 					}
 					//获取的容器名会加'/'作为前缀，需加上
 					name := fmt.Sprintf("/%s", serviceInfo.ServiceName)
@@ -148,12 +148,12 @@ func Rollback(dataId int64) {
 							err = docker.StopContainer(machineInfo.Ip, serviceInfo.ServiceName)
 							if err != nil {
 								deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_ERR, machineId, deploy.MACHINE_ERR, err.Error(), -1)
-								return
+								continue
 							}
 							err = docker.RemoveContainer(machineInfo.Ip, serviceInfo.ServiceName, true, false, false)
 							if err != nil {
 								deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_ERR, machineId, deploy.MACHINE_ERR, err.Error(), -1)
-								return
+								continue
 							}
 						}
 					}
@@ -168,7 +168,7 @@ func Rollback(dataId int64) {
 					deploy.RewriteDeployLog(deployInfo.Id, logStrAdd)
 					if err != nil {
 						deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_ERR, machineId, deploy.MACHINE_ERR, err.Error(), -1)
-						return
+						continue
 					}
 
 					//进行到创建容器的步骤
@@ -191,7 +191,7 @@ func Rollback(dataId int64) {
 					_, err = docker.CreateContainer(createParam)
 					if err != nil {
 						deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_ERR, machineId, deploy.MACHINE_ERR, err.Error(), -1)
-						return
+						continue
 					}
 					//deploy.RewriteDeployLog(deployInfo.Id, fmt.Sprintf("\ncreate container: %s\n", containerId))
 
@@ -201,7 +201,7 @@ func Rollback(dataId int64) {
 					err = docker.StartContainer(machineInfo.Ip, serviceInfo.ServiceName)
 					if err != nil {
 						deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_ERR, machineId, deploy.MACHINE_ERR, err.Error(), -1)
-						return
+						continue
 					}
 					//deploy.RewriteDeployLog(deployInfo.Id, "\nstart container succ\n")
 				}
@@ -209,10 +209,9 @@ func Rollback(dataId int64) {
 				//machineSuccNum++
 				//progessStatus := machineSuccNum * 100 / machineNum
 				//deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_UNUSE, machineId, deploy.MACHINE_SUCC, "", progessStatus)
-				deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_UNUSE, machineId, deploy.MACHINE_BACK, "", -1)
+				deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_UNUSE, machineId, deploy.MACHINE_BACK, "rollback success", -1)
 			}
-			deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_BACK, -1, -1, "", -1)
-			break
+			deploy.RewriteDeployHostList(deployInfo.Id, stageId, deploy.STAGE_BACK, -1, -1, "all machine rollback success", -1)
 		}
 	}
 

@@ -16,6 +16,7 @@ type Service struct {
 	UpdateDate      int64  `json:"update_date" form:"update_date"`
 	ServiceMember   string `json:"service_member" form:"service_member"`
 	IsDel           int    `json:"is_del" form:"is_del"`
+	ServiceStatu    int    `json:"service_statu" form:"service_statu"`
 }
 
 type ServiceData struct {

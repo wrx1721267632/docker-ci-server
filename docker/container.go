@@ -261,7 +261,7 @@ func PullImage(host string, imageName string) (string, error) {
 	var mess string
 	for _, row := range list {
 		mess += row.Mess
-		mess += "\n"
+		mess += "<br>"
 	}
 
 	return mess, nil

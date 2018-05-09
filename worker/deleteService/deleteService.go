@@ -12,6 +12,7 @@ import (
 
 type MachineJson struct {
 	Id              int64  `json:"id"`
+	Name            string `json:"name"`
 	ContainerStatus string `json:"container_status"`
 }
 
