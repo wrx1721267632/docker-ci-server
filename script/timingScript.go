@@ -40,7 +40,7 @@ func CheckContainer() {
 		}
 
 		for _, service := range serviceAll {
-			fmt.Println("start")
+			//fmt.Println("start")
 			// 解析机器列表
 			var machineList MachineListJson
 			err = json.Unmarshal([]byte(service.HostList), &machineList)
@@ -80,9 +80,10 @@ func CheckContainer() {
 							if containerInfo.State != "running" {
 								err = docker.StartContainer(machineInfo.Ip, service.ServiceName)
 								if err != nil {
-									log.Printf("restart the container: host[%s], service[%s]\n", machineInfo.Ip, service.ServiceName)
-									return
+									log.Errorf("restart container error: host[%s], service[%s]\n", machineInfo.Ip, service.ServiceName)
+									continue
 								}
+								log.Errorf("restart the container: host[%s], service[%s]\n", machineInfo.Ip, service.ServiceName)
 							}
 							flag = true
 							break
@@ -91,6 +92,7 @@ func CheckContainer() {
 
 					if flag == false {
 						machineList.Stage[stageId].Machine[machineId].ContainerStatus = "There is no container in the machine!"
+						log.Errorf("There is no container in the machine: host[%s], service[%s]\n", machineInfo.Ip, service.ServiceName)
 					}
 				}
 			}
@@ -107,7 +109,7 @@ func CheckContainer() {
 				log.Errorf("rewrite service record sql error: ErrorReason[%s]", err)
 				continue
 			}
-			fmt.Println("end")
+			//fmt.Println("end")
 		}
 	}
 }

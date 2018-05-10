@@ -10,6 +10,7 @@ import (
 	"github.com/wrxcode/deploy-server/common/g"
 	"github.com/wrxcode/deploy-server/dispatch"
 	"github.com/wrxcode/deploy-server/router"
+	"github.com/wrxcode/deploy-server/script"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 
 	go dispatch.StartConsume()
 
-	//go script.CheckContainer()
+	go script.CheckContainer()
 
 	graceful.LogListenAndServe(&http.Server{
 		Addr:    fmt.Sprintf(":%d", g.Conf().Run.HTTPPort),
